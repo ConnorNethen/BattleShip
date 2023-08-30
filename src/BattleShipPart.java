@@ -102,8 +102,7 @@ public class BattleShipPart extends JFrame
     					running = false;
     				}
     				if (BattleShipPart.totalGuessesLeft == 0) {
-    					MyJButton mjb2 = (MyJButton)event.getSource();
-    					//exposeShips(mjb2);
+    					exposeShips(mjb);
     					gameStatus = false;
     					running = false;
     				}
@@ -114,7 +113,7 @@ public class BattleShipPart extends JFrame
     				setTitle("BattleShip                                                         " + 
     		                BattleShipPart.totalGuessesLeft +" Guesses Left, " + BattleShipPart.totalShipsLeft + " Ships Left");
     			}
-    			//exposeShips(mjb);
+
     		}
     		
     		if (!running) {
@@ -138,12 +137,13 @@ public class BattleShipPart extends JFrame
     			else if (i >= 17) color = 5;
     			
     			MyJButton newButton = (MyJButton)mjb.getParent().getComponent(shipLocations[i]);
-    			newButton.setBackground(EXPOSED_SHIP_BACKGROUND_COLOR[color]); // CHANGED
-    			newButton.setText(EXPOSED_SHIP_HIT_TEXT);
+    			newButton.setBackground(EXPOSED_SHIP_BACKGROUND_COLOR[color]);
+    			//newButton.setText(EXPOSED_SHIP_HIT_TEXT);
+    			newButton.setText("NOT HIT");
     			
     			//newButton.setForeground(EXPOSED_CELL_FOREGROUND_COLOR_MAP[shipGrid[newButton.ROW][newButton.COL]]);
     			newButton.setForeground(EXPOSED_CELL_FOREGROUND_COLOR_MAP[1]);
-    			mjb.setText(getGridValueStr(newButton.ROW, newButton.COL));
+    			//mjb.setText(getGridValueStr(newButton.ROW, newButton.COL));
     		}
     	}
     	
@@ -172,6 +172,7 @@ public class BattleShipPart extends JFrame
     		///mjb.setForeground(EXPOSED_CELL_FOREGROUND_COLOR_MAP[shipGrid[mjb.ROW][mjb.COL]]);
     		mjb.setForeground(EXPOSED_CELL_FOREGROUND_COLOR_MAP[foreGround]);
     		mjb.setText(getGridValueStr(mjb.ROW, mjb.COL));
+    		System.out.println("last guess at " + mjb.ROW + mjb.COL + " says " + getGridValueStr(mjb.ROW, mjb.COL));
     		return cellReturned;
     	}
     	
