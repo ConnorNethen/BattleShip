@@ -108,7 +108,6 @@ public class BattleShipPart extends JFrame
     					running = false;
     				}
     				if (cellExposed != -1) {
-            			//BattleShipPart.totalShipsLeft = checkSunk(BattleShipPart.shipLocations, cellExposed);
     					BattleShipPart.totalShipsLeft = checkSunk(playingShips);
             		}
     				
@@ -118,12 +117,10 @@ public class BattleShipPart extends JFrame
     			//exposeShips(mjb);
     		}
     		
-    		MyJButton mjb = (MyJButton)event.getSource();
     		if (!running) {
     			if (gameStatus) // If user wins game
     				setTitle("BattleShip                                                         " +  "Congratulations, You Win!");
     			else // If user loses game
-    				exposeShips(mjb);
     				setTitle("BattleShip                                                         " +  "Game Over, You Lose!");
     		}
     	}
