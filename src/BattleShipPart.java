@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Arrays;
 
 
 public class BattleShipPart extends JFrame
@@ -14,7 +15,7 @@ public class BattleShipPart extends JFrame
 	private static int totalShipsLeft = TOTAL_SHIPS;
 	private static final int TOTAL_SHIP_SPOTS = 19; // Number of spots needed to sink all ships
 	private static int totalSpotsLeft = TOTAL_SHIP_SPOTS; // Number of ships left on board
-	private static final int TOTAL_GUESSES = 50; // Number of guesses per game
+	private static final int TOTAL_GUESSES = 1; // Number of guesses per game
 	private static int totalGuessesLeft = TOTAL_GUESSES; // Number of guesses left to guess
 	
 	private static final String INITIAL_CELL_TEXT = "";
@@ -23,6 +24,7 @@ public class BattleShipPart extends JFrame
   
     // visual indication of an exposed MyJButton
     private static final Color EXPOSED_CELL_BACKGROUND_COLOR = Color.blue;
+    // colors used when displaying different ships
     private static final Color EXPOSED_SHIP_BACKGROUND_COLOR[] = {Color.darkGray, Color.cyan, Color.green, Color.pink, Color.orange, Color.yellow};
     // colors used when displaying the getStateStr() String
     private static final Color EXPOSED_CELL_FOREGROUND_COLOR_MAP[] = {Color.white, Color.red};
@@ -33,16 +35,13 @@ public class BattleShipPart extends JFrame
     private static final int GRID_COLS = 10;
     private int[][] shipGrid = new int[GRID_ROWS][GRID_COLS];
     private static int[] shipLocations = new int[TOTAL_SHIP_SPOTS];
-    //public static int[] shipLocations = new int[TOTAL_SHIP_SPOTS];
-    private static int[] hitLocations = new int[TOTAL_SHIP_SPOTS];
+    private static int[] unHitLocations = new int[TOTAL_SHIP_SPOTS];
 	public static Ship[] playingShips;
 
     private static final int IS_A_MISS = 0;
-    private static final int IS_A_HIT = 1;
   
     private boolean running = true;
     private boolean gameStatus = true;
-    //private boolean flag = false;
   
     public BattleShipPart() {
     	this.setTitle("BattleShip                                                         " + 
@@ -55,9 +54,8 @@ public class BattleShipPart extends JFrame
     	// set the grid of MyJbuttons
     	this.createContents();
     
-    	// place MINES number of mines in sGrid and adjust all of the "mines in perimeter" values
+    	// place ships on the board
     	this.setShips();
-    	//Ship[] playingShips = this.setShips();
     	
     	this.setVisible(true);
     }
@@ -86,8 +84,6 @@ public class BattleShipPart extends JFrame
     	public void actionPerformed(ActionEvent event) {
     		int cellExposed = -1;
     		if ( running ) {
-    			// used to determine if ctrl or alt key was pressed at the time of mouse action
-    			//int mod = event.getModifiers();
     			MyJButton mjb = (MyJButton)event.getSource();
         
     			// is the MyJbutton that the mouse action occurred in already exposed
@@ -119,8 +115,15 @@ public class BattleShipPart extends JFrame
     		if (!running) {
     			if (gameStatus) // If user wins game
     				setTitle("BattleShip                                                         " +  "Congratulations, You Win!");
-    			else // If user loses game
-    				setTitle("BattleShip                                                         " +  "Game Over, You Lose!");
+    			else { // If user loses game
+    				int shipsLeft = 6 - BattleShipPart.totalShipsLeft;
+    				if (shipsLeft == 1) {
+    					setTitle("BattleShip                                                         " +  "Game Over, You Lose! You sunk " 
+    							+ shipsLeft + " Ship!");
+    				} else
+    					setTitle("BattleShip                                                         " +  "Game Over, You Lose! You sunk " 
+    						+ shipsLeft + " Ships!");
+    			}
     		}
     	}
     	
@@ -129,21 +132,19 @@ public class BattleShipPart extends JFrame
     		// Upon losing game, reveal the remaining ships that were not hit
 
     		int color = 0;
-    		for (int i = 0; i < shipLocations.length; ++i) {
-    			if (i >= 5 && i <= 8) color = 1;
-    			else if (i >= 9 && i <= 11) color = 2;
-    			else if (i >= 12 && i <= 14) color = 3;
-    			else if (i >= 15 && i <= 16) color = 4;
-    			else if (i >= 17) color = 5;
-    			
-    			MyJButton newButton = (MyJButton)mjb.getParent().getComponent(shipLocations[i]);
-    			newButton.setBackground(EXPOSED_SHIP_BACKGROUND_COLOR[color]);
-    			//newButton.setText(EXPOSED_SHIP_HIT_TEXT);
-    			newButton.setText("NOT HIT");
-    			
-    			//newButton.setForeground(EXPOSED_CELL_FOREGROUND_COLOR_MAP[shipGrid[newButton.ROW][newButton.COL]]);
-    			newButton.setForeground(EXPOSED_CELL_FOREGROUND_COLOR_MAP[1]);
-    			//mjb.setText(getGridValueStr(newButton.ROW, newButton.COL));
+    		for (int i = 0; i < shipLocations.length; ++i) { // changed from shipLocations.length
+    			if (unHitLocations[i] == 0) {
+	    			if (i >= 5 && i <= 8) color = 1;
+	    			else if (i >= 9 && i <= 11) color = 2;
+	    			else if (i >= 12 && i <= 14) color = 3;
+	    			else if (i >= 15 && i <= 16) color = 4;
+	    			else if (i >= 17) color = 5;
+	    			
+	    			MyJButton newButton = (MyJButton)mjb.getParent().getComponent(shipLocations[i]);
+	    			newButton.setBackground(EXPOSED_SHIP_BACKGROUND_COLOR[color]);
+	    			newButton.setText("NOT HIT");
+	    			newButton.setForeground(EXPOSED_CELL_FOREGROUND_COLOR_MAP[1]);
+    			}
     		}
     	}
     	
@@ -154,59 +155,106 @@ public class BattleShipPart extends JFrame
     		
     		int cellReturned = -1;
     		int foreGround = -1;
-    		// if the MyJButton that was just exposed is a miss ...
+    		boolean shipSunk = false;
+    		
+    		// if the MyJButton that was just exposed is a MISS ...
     		if ( shipGrid[mjb.ROW][mjb.COL] == IS_A_MISS ) {
     			mjb.setBackground(EXPOSED_CELL_BACKGROUND_COLOR);
     			--BattleShipPart.totalGuessesLeft;
     			foreGround = 0;
-    		} else { // if the MyJButton that was just exposed is a ship spot ...
+    		} else { // if the MyJButton that was just exposed is a HIT ...
     			mjb.setBackground(EXPOSED_SHIP_BACKGROUND_COLOR[shipGrid[mjb.ROW][mjb.COL]-1]);
     			--BattleShipPart.totalSpotsLeft;
     			cellReturned = mjb.ROW * 10 + mjb.COL;
     			foreGround = 1;
-    			modifyShip(cellReturned);
+    			shipSunk = modifyShip(cellReturned, mjb); // modify the ship object
     		}
     		
-    		
     		// expose this MyJButton
-    		///mjb.setForeground(EXPOSED_CELL_FOREGROUND_COLOR_MAP[shipGrid[mjb.ROW][mjb.COL]]);
+    		if (!shipSunk) {
+    			mjb.setText(getGridValueStr(mjb.ROW, mjb.COL));
+    		}
     		mjb.setForeground(EXPOSED_CELL_FOREGROUND_COLOR_MAP[foreGround]);
-    		mjb.setText(getGridValueStr(mjb.ROW, mjb.COL));
-    		System.out.println("last guess at " + mjb.ROW + mjb.COL + " says " + getGridValueStr(mjb.ROW, mjb.COL));
+    		
     		return cellReturned;
     	}
     	
     	
-    	public void modifyShip(int cell) {
+    	public boolean modifyShip(int cell, MyJButton mjb) {
     		int i = 0;
     		while (i < shipLocations.length) {
     			if (shipLocations[i] == cell) break;
     			++i;
     		}
     		
+    		// Marks the index in unHitLocations to a '1' as in it was hit
+    		// The index i corresponds to the location in shipLocations
+    		unHitLocations[i] = 1;
+    		boolean flag = false;
+
     		if (i < 5) {
     			++playingShips[0].totalHits;
     			playingShips[0].setSunk();
+    			if (playingShips[0].isSunk()) {
+    				// Change the text on the ships cells to "SUNK"
+    				modifyShipCells(playingShips[0], mjb);
+    				flag = true;
+    			}
     		}
     		else if (i >= 5 && i <= 8) {
     			++playingShips[1].totalHits;
     			playingShips[1].setSunk();
+    			if (playingShips[1].isSunk()) {
+    				// Change the text on the ships cells to "SUNK"
+    				modifyShipCells(playingShips[1], mjb);
+    				flag = true;
+    			}
     		}
     		else if (i >= 9 && i <= 11) {
     			++playingShips[2].totalHits;
     			playingShips[2].setSunk();
+    			if (playingShips[2].isSunk()) {
+    				// Change the text on the ships cells to "SUNK"
+    				modifyShipCells(playingShips[2], mjb);
+    				flag = true;
+    			}
     		}
     		else if (i >= 12 && i <= 14) {
     			++playingShips[3].totalHits;
     			playingShips[3].setSunk();
+    			if (playingShips[3].isSunk()) {
+    				// Change the text on the ships cells to "SUNK"
+    				modifyShipCells(playingShips[3], mjb);
+    				flag = true;
+    			}
     		}
     		else if (i >= 15 && i <= 16) {
     			++playingShips[4].totalHits;
     			playingShips[4].setSunk();
+    			if (playingShips[4].isSunk()) {
+    				// Change the text on the ships cells to "SUNK"
+    				modifyShipCells(playingShips[4], mjb);
+    				flag = true;
+    			}
     		}
     		else {
     			++playingShips[5].totalHits;
     			playingShips[5].setSunk();
+    			if (playingShips[5].isSunk()) {
+    				// Change the text on the ships cells to "SUNK"
+    				modifyShipCells(playingShips[5], mjb);
+    				flag = true;
+    			}
+    		}
+    		
+    		return flag;
+    	}
+    	
+    	
+    	public void modifyShipCells(Ship s, MyJButton mjb) {
+    		for (int i = 0; i < s.data.length; ++i) {
+    			MyJButton newButton = (MyJButton)mjb.getParent().getComponent(s.data[i]);
+    			newButton.setText("SUNK");
     		}
     	}
     }
@@ -225,6 +273,9 @@ public class BattleShipPart extends JFrame
     private void setShips() {
     	int row, col;
     	shipLocations = createShips();
+    	Arrays.fill(unHitLocations, 0);
+    	
+    	// PRINTS OUT LOCATIONS OF SHIPS (PLEASE DELETE)
     	System.out.println("This is the array for shipLocations");
     	for (int i = 0; i < shipLocations.length; ++i) {
     		System.out.print(shipLocations[i] + " ");
@@ -252,15 +303,10 @@ public class BattleShipPart extends JFrame
     		for (int i = 0; i < s.data.length; ++i) {
         		row = s.data[i] / 10;
         		col = s.data[i] % 10;
-        		//this.shipGrid[row][col] = IS_A_HIT;
         		this.shipGrid[row][col] = s.color;
         	}
     	}
-    	
-    	
-    	setLoc(hitLocations); // for determining number of ships left
     }
-    
     
     /*
      * Helper method for setShips
@@ -487,6 +533,9 @@ public class BattleShipPart extends JFrame
 		}
 	}
 	
+    /*
+     * Helper function for createShips()
+     */
 	private static boolean checkSpot(int[] spots, int num) {
 		for (int i = 0; i < spots.length; ++i) {
 			if (num == spots[i]) return false; // bad location
@@ -495,6 +544,9 @@ public class BattleShipPart extends JFrame
 		return true; // good location
 	}
 	
+	/*
+     * Helper function for createShips()
+     */
 	private static boolean checkHorz(int[] arr) {
 		int row = arr[0] / 10;
 		boolean check = true;
@@ -506,7 +558,10 @@ public class BattleShipPart extends JFrame
 		return check;
 	}
 	
-	private static int checkSunk(Ship[] ships) { // given shipLocations and cellExposed
+	/*
+     * Checks how many ships have been sunk
+     */
+	private static int checkSunk(Ship[] ships) {
 		int unSunk = 0;
 		for (Ship s : ships) {
 			if (!s.isSunk()) {
@@ -514,71 +569,6 @@ public class BattleShipPart extends JFrame
 			}
 		}
 		return unSunk;
-		
-		
-		
-		
-		// mark which spot was hit
-		/*
-		for (int i = 0; i < arr.length; ++i) {
-			if (arr[i] == cell) {
-				hitLocations[i] = 1; // location has been hit
-			}	
-		}
-		
-		int sunk = 0;
-		boolean isSunk = true;
-		// check if any sunk ships --> 0-4, 5-8, 9-11, 12-14, 15-16, 17-18
-		// check 5 spot ship
-		for (int i = 0; i < 5; ++i) {
-			if (hitLocations[i] == -1) {
-				isSunk = false;
-			}
-		}
-		if (isSunk) {
-			++sunk;
-		} else { isSunk = true; }
-		
-		// check 4 spot ship
-		for (int i = 5; i < 9; ++i) {
-			if (hitLocations[i] == -1) {
-				isSunk = false;
-			}
-		}
-		if (isSunk) {
-			++sunk;
-		} else { isSunk = true; }
-		
-		// check 3 spot ship (2 times)
-		int j = 0;
-		while (j <= 3) {
-			for (int i = 9+j; i < 12+j; ++i) {
-				if (hitLocations[i] == -1) {
-					isSunk = false;
-				}
-			}
-			if (isSunk) {
-				++sunk;
-			} else { isSunk = true; }
-			j = j + 3;
-		}
-		
-		// check 2 spot ship (2 times)
-		j = 0;
-		while (j <= 2) {
-			for (int i = 15+j; i < 17+j; ++i) {
-				if (hitLocations[i] == -1) {
-					isSunk = false;
-				}
-			}
-			if (isSunk) {
-				++sunk;
-			} else { isSunk = true; }
-			j = j + 2;
-		}
-		
-		return TOTAL_SHIPS - sunk;
-		*/
 	}
   
     private String getGridValueStr(int row, int col) {

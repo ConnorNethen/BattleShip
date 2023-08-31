@@ -1,3 +1,6 @@
+/*
+ * Ship Object
+ */
 public class Ship {
 	public int[] data;
 	public int totalHits;
@@ -11,10 +14,16 @@ public class Ship {
 		this.sunk = false;
 	}
 
+	/*
+	 * get function
+	 */
 	public boolean isSunk() {
 		return this.sunk;
 	}
 	
+	/*
+	 * set function
+	 */
 	public void setSunk() {
 		if (this.totalHits < this.data.length) {
 			this.sunk = false;
