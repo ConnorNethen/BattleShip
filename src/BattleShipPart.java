@@ -15,7 +15,7 @@ public class BattleShipPart extends JFrame
 	private static int totalShipsLeft = TOTAL_SHIPS;
 	private static final int TOTAL_SHIP_SPOTS = 19; // Number of spots needed to sink all ships
 	private static int totalSpotsLeft = TOTAL_SHIP_SPOTS; // Number of ships left on board
-	private static final int TOTAL_GUESSES = 1; // Number of guesses per game
+	private static final int TOTAL_GUESSES = 50; // Number of guesses per game
 	private static int totalGuessesLeft = TOTAL_GUESSES; // Number of guesses left to guess
 	
 	private static final String INITIAL_CELL_TEXT = "";
