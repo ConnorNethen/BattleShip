@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Arrays;
-
+// Something is broken
 
 public class BattleShipPart extends JFrame
 {
