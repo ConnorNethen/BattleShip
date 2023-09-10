@@ -3,13 +3,13 @@
  */
 public class Ship {
 	public int[] data;
-	public int totalHits;
+	public boolean[] totalHits;
 	public int color;
 	private boolean sunk;
 	
 	public Ship(int[] arr, int color) {
 		this.data = arr;
-		this.totalHits = 0;
+		this.totalHits = new boolean[arr.length];
 		this.color = color;
 		this.sunk = false;
 	}
@@ -25,10 +25,12 @@ public class Ship {
 	 * set function
 	 */
 	public void setSunk() {
-		if (this.totalHits < this.data.length) {
-			this.sunk = false;
-		} else {
-			this.sunk = true;
+		for (int i = 0; i < this.totalHits.length; ++i) {
+			if (!this.totalHits[i]) {
+				//this.sunk = false;
+				return;
+			}
 		}
+		this.sunk = true;
 	}
 }
