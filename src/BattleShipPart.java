@@ -9,12 +9,14 @@ public class BattleShipPart extends JFrame
 	private static final int WINDOW_HEIGHT = 900;
 	private static final int WINDOW_WIDTH = 900;
 	
+	private static long startTime = 0;
+	private static long endTime = 0;
 	
 	private static final int TOTAL_SHIPS = 6; // Number of ships placed on grid
 	private static int totalShipsLeft = TOTAL_SHIPS;
 	private static final int TOTAL_SHIP_SPOTS = 19; // Number of spots needed to sink all ships
 	private static int totalSpotsLeft = TOTAL_SHIP_SPOTS; // Number of ships left on board
-	private static final int TOTAL_GUESSES = 5; // Number of guesses per game
+	private static final int TOTAL_GUESSES = 50; // Number of guesses per game
 	private static int totalGuessesLeft = TOTAL_GUESSES; // Number of guesses left to guess
 	
 	private static final String INITIAL_CELL_TEXT = "";
@@ -95,11 +97,13 @@ public class BattleShipPart extends JFrame
     				if (BattleShipPart.totalSpotsLeft == 0) {
     					gameStatus = true;
     					running = false;
+    					endTime = System.currentTimeMillis();
     				}
     				if (BattleShipPart.totalGuessesLeft == 0) {
     					exposeShips(mjb);
     					gameStatus = false;
     					running = false;
+    					endTime = System.currentTimeMillis();
     				}
     				if (cellExposed != -1) {
     					BattleShipPart.totalShipsLeft = checkSunk(playingShips);
@@ -112,8 +116,11 @@ public class BattleShipPart extends JFrame
     		}
     		
     		if (!running) {
-    			if (gameStatus) // If user wins game
+    			if (gameStatus) { // If user wins game
     				setTitle("BattleShip                                                         " +  "Congratulations, You Win!");
+    				float gameTime = (float) ((endTime - startTime) / 1000.0);
+        			System.out.printf("\n\nCompleted game in %.2f Seconds", gameTime);
+    			}
     			else { // If user loses game
     				int shipsLeft = 6 - BattleShipPart.totalShipsLeft;
     				if (shipsLeft == 1) {
@@ -238,7 +245,8 @@ public class BattleShipPart extends JFrame
     public static void main(String[] args)
     {
     	
-    	// Generate ships
+    	// Generate Game
+    	BattleShipPart.startTime = System.currentTimeMillis();
     	new BattleShipPart();
     }
   
