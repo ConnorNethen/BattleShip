@@ -31,7 +31,6 @@ public class BattleShipPart extends JFrame
     private static final Color EXPOSED_CELL_FOREGROUND_COLOR_MAP[] = {Color.white, Color.red};
 
   
-    // holds the "number of mines in perimeter" value for each MyJButton 
     private static final int GRID_ROWS = 10;
     private static final int GRID_COLS = 10;
     private int[][] shipGrid = new int[GRID_ROWS][GRID_COLS];
@@ -64,7 +63,6 @@ public class BattleShipPart extends JFrame
     public void createContents() {
     	for (int sgr = 0; sgr < GRID_ROWS; ++sgr) {  
     		for (int sgc = 0; sgc < GRID_COLS; ++sgc) {  
-    			// set sGrid[sgr][sgc] entry to 0 - no mines in it's perimeter
     			this.shipGrid[sgr][sgc] = 0;
         
     			// create a MyJButton that will be at location (sgr, sgc) in the GridLayout
@@ -133,7 +131,12 @@ public class BattleShipPart extends JFrame
     		}
     	}
     	
-    	
+    	/*
+    	 * Upon loosing the game, this method exposes all of the ship spots
+    	 * that were not hit by the user. The spots are exposed to reveal the
+    	 * ship's color and the text "NOT HIT".
+    	 * Argument: MyJButton mjb
+    	 */
     	public void exposeShips(MyJButton mjb) {
     		// Upon losing game, reveal the remaining ships that were not hit
     		for (Ship s: BattleShipPart.playingShips) {
@@ -149,7 +152,11 @@ public class BattleShipPart extends JFrame
     		}
     	}
     	
-    	
+    	/*
+    	 * Method to expose the cell that has been clicked on
+    	 * Argument: MyJButton mjb
+    	 * Returns: int cellreturned representing the value of the cell that was clicked
+    	 */
     	public int exposeCell(MyJButton mjb) {
     		if ( !running )
     			return -1;
@@ -185,7 +192,11 @@ public class BattleShipPart extends JFrame
     		return cellReturned;
     	}
     	
-    	
+    	/*
+    	 * Method that modifies the ship object upon a hit
+    	 * Arguments: int cell, MyJButton mjb
+    	 * Returns: boolean flag representing whether of not the hit cell caused a ship to be sunk
+    	 */
     	public boolean modifyShip(int cell, MyJButton mjb) {
     		Boolean flag = false;
     		Boolean shipFound = false;
@@ -209,7 +220,11 @@ public class BattleShipPart extends JFrame
     		return flag;
     	}
     	
-    	
+    	/*
+    	 * Helper function for "modifyShip()" that changes the text of the currently hit
+    	 * ship that has just been sunk. The text changes from "HIT" to "SUNK"
+    	 * Arguments: Ship s, MyJButton mjb
+    	 */
     	public void modifyShipCells(Ship s, MyJButton mjb) {
     		for (int i = 0; i < s.data.length; ++i) {
     			MyJButton newButton = (MyJButton)mjb.getParent().getComponent(s.data[i]);
@@ -217,6 +232,13 @@ public class BattleShipPart extends JFrame
     		}
     	}
     	
+    	/*
+    	 * Helper function for "exposeCell()" that checks the guessHitLocations array to
+    	 * see if the current clicked on cell has been already hit. If it has been hit 
+    	 * return false, it it hasn't been hit return True.
+    	 * Argument: int cell
+    	 * Returns: boolean representing whether or not the current hit spot has been guessed.
+    	 */
     	public boolean isUnHitLocation(int cell) {
     		for (int i = 0; i < BattleShipPart.guessedHitLocations.length; ++i) {
     			if (BattleShipPart.guessedHitLocations[i] == cell) return false;
@@ -224,6 +246,13 @@ public class BattleShipPart extends JFrame
     		return true;
     	}
     	
+    	/*
+    	 * Helper function for "exposeCell()" that checks whether or not the clicked on 
+    	 * cell (that resulted in a hit) is part of a already sunken ship. If the ship has
+    	 * been sunk, it returns true, if the ship has not been sunk it returns false.
+    	 * Argument: int cell
+    	 * Returns: boolean representing whether or not the ship that was hit is sunk.
+    	 */
     	public boolean shipIsSunk(int cell) {
     		boolean flag = false;
     		Ship cur = null;
